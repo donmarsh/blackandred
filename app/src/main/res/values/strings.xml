@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">FCMilan</string>
+    <string name="title_activity_history">HistoryActivity</string>
+    <string name="title_activity_trophies">TrophiesActivity</string>
+    <string name="title_activity_players">PlayersActivity</string>
+    <string name="title_activity_matches">MatchesActivity</string>
+    <string name="title_activity_gallery">GalleryActivity</string>
+</resources>

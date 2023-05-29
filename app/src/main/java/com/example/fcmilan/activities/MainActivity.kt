@@ -5,7 +5,10 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +16,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,14 +26,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.fcmilan.R
+import com.example.fcmilan.ui.theme.Black
 import com.example.fcmilan.ui.theme.FCMilanTheme
+import com.example.fcmilan.ui.theme.RedGradientStart
+import com.example.fcmilan.ui.theme.RedPlain
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,13 +90,27 @@ fun buttonList(){
 fun mainButton(buttonText:String){
     val context = LocalContext.current
     Button(modifier = Modifier
-        .width(200.dp)
-        .height(120.dp).padding(20.dp),
+        .width(250.dp)
+        .height(85.dp).padding(20.dp),
+        colors = buttonColors(RedPlain),
+        shape = RectangleShape,
         onClick = {
         switchActivity(context, buttonText)
         }) {
+        Box(
+            modifier = Modifier
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            RedGradientStart,
+                           Black
+                        )
+                    )
+                ).border(BorderStroke(2.dp, Color.White)).fillMaxSize(), contentAlignment = Alignment.Center
+        ) {
+            Text(text = buttonText)
+        }
 
-        Text(text = buttonText)
     }
 }
 fun switchActivity(context: Context, name:String)

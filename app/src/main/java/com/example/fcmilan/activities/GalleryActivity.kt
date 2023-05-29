@@ -22,7 +22,7 @@ class GalleryActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting6("Android")
+                    Greeting6("Gallery")
                 }
             }
         }

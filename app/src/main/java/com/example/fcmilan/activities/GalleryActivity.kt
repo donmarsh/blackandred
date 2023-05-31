@@ -10,16 +10,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.fcmilan.R
 import com.example.fcmilan.activities.ui.theme.FCMilanTheme
 
 class GalleryActivity : ComponentActivity() {
@@ -29,9 +31,13 @@ class GalleryActivity : ComponentActivity() {
             FCMilanTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
+                    modifier = with (Modifier){
+                        fillMaxSize()
+                            .paint(
+                                // Replace with your image id
+                                painterResource(id = R.drawable.white_background),
+                                contentScale = ContentScale.FillBounds)
+                    }, color = Color.Transparent) {
                     GalleryPage()
                 }
             }

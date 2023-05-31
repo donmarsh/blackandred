@@ -11,6 +11,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -85,15 +86,16 @@ fun ButtonList(){
 fun MainButton(buttonText:String){
     val context = LocalContext.current
     Button(modifier = Modifier
-        .width(250.dp)
-        .height(85.dp).padding(20.dp),
+        .width(300.dp)
+        .height(100.dp).padding(20.dp),
         colors = buttonColors(RedPlain),
         shape = RectangleShape,
+        contentPadding = PaddingValues(0.dp),
         onClick = {
         switchActivity(context, buttonText)
         }) {
         Box(
-            modifier = Modifier
+            modifier = Modifier.padding(5.dp)
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
@@ -101,7 +103,8 @@ fun MainButton(buttonText:String){
                            Black
                         )
                     )
-                ).border(BorderStroke(2.dp, Color.White)).fillMaxSize(), contentAlignment = Alignment.Center
+                ).border(BorderStroke(2.dp, Color.White))
+                .fillMaxSize(), contentAlignment = Alignment.Center,
         ) {
             Text(text = buttonText)
         }

@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -16,24 +15,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.fcmilan.R
@@ -56,7 +51,7 @@ class MainActivity : ComponentActivity() {
                                     painterResource(id = R.drawable.red_background),
                                     contentScale = ContentScale.FillBounds)
                         }, color = Color.Transparent) {
-                        buttonList()
+                        ButtonList()
                     }
 
 
@@ -73,21 +68,21 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     )
 }
 @Composable
-fun buttonList(){
+fun ButtonList(){
    
     Column(verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally)
     {
-        mainButton(buttonText = "HISTORY")
-        mainButton(buttonText = "TROPHIES")
-        mainButton(buttonText = "PLAYERS")
-        mainButton(buttonText = "MATCHES")
-        mainButton(buttonText = "GALLERY")
+        MainButton(buttonText = "HISTORY")
+        MainButton(buttonText = "TROPHIES")
+        MainButton(buttonText = "PLAYERS")
+        MainButton(buttonText = "MATCHES")
+        MainButton(buttonText = "GALLERY")
     }
 
 }
 @Composable
-fun mainButton(buttonText:String){
+fun MainButton(buttonText:String){
     val context = LocalContext.current
     Button(modifier = Modifier
         .width(250.dp)

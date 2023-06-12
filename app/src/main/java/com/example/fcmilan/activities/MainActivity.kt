@@ -36,6 +36,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -241,7 +242,8 @@ fun Header(text:String) {
 @Composable
 fun TrophyPage(contentPadding:PaddingValues) {
     Column (modifier = Modifier
-        .fillMaxSize().padding(contentPadding)){
+        .fillMaxSize()
+        .padding(contentPadding)){
         Header(text = "TROPHIES")
         TrophyImage()
         TrophyInformation()
@@ -266,7 +268,8 @@ fun TrophyInformation() {
 fun GalleryPage(contentPadding:PaddingValues)
 {
     val context = LocalContext.current
-    Column(verticalArrangement = Arrangement.Top, modifier = Modifier.padding(contentPadding)
+    Column(verticalArrangement = Arrangement.Top, modifier = Modifier
+        .padding(contentPadding)
         .verticalScroll(rememberScrollState())) {
         Header(text = "AC Milan")
         for(i in 1..10)
@@ -304,6 +307,43 @@ fun MatchesPage(contentPadding: PaddingValues)
         text = "Matches Page!",
         modifier = Modifier.padding(contentPadding)
     )
+}
+@Composable
+fun fixturesCard()
+{
+    Box(modifier = Modifier
+        .padding(10.dp)
+        .fillMaxWidth()
+        .height(150.dp)
+        .background(color = RedPlain))
+    {
+        Box(modifier = Modifier.padding(5.dp).background(
+            color = Color.Black
+            )
+        .border(BorderStroke(2.dp, Color.White)))
+    }
+}
+@Composable
+fun PlayersCard()
+{
+    Box(modifier = Modifier
+        .padding(10.dp)
+        .fillMaxWidth()
+        .height(150.dp)
+        .background(color = RedPlain).shadow(1.dp))
+    {
+        Box(modifier = Modifier.padding(5.dp).background(
+            brush = Brush.horizontalGradient(
+                colors = listOf(
+                    RedGradientStart,
+                    Black
+                )
+            )
+        ).border(BorderStroke(2.dp, Color.White)))
+        {
+
+        }
+    }
 }
 
 @Composable

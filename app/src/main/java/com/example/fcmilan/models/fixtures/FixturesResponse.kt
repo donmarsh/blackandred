@@ -3,7 +3,7 @@ package com.example.fcmilan.models.fixtures
 import com.google.gson.annotations.SerializedName
 
 
-data class ExampleJson2KtKotlin (
+data class FixturesResponse (
 
   @SerializedName("get"        ) var get        : String?             = null,
   @SerializedName("parameters" ) var parameters : Parameters?         = Parameters(),

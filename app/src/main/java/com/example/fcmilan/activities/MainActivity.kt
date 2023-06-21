@@ -3,6 +3,7 @@ package com.example.fcmilan.activities
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.StringRes
@@ -57,15 +58,25 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.fcmilan.R
+import com.example.fcmilan.models.fixtures.FixturesApiResponse
+import com.example.fcmilan.models.players.TeamResponse
+import com.example.fcmilan.services.FootballApi
+import com.example.fcmilan.services.RetrofitClient
 import com.example.fcmilan.ui.theme.Black
 import com.example.fcmilan.ui.theme.FCMilanTheme
 import com.example.fcmilan.ui.theme.RedGradientStart
 import com.example.fcmilan.ui.theme.RedPlain
 import com.example.fcmilan.viewmodels.MainViewModel
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
     private lateinit var viewModel: MainViewModel
-
+    val API_TEAM_ID = "489"
+    val LEAGUE_ID = "135" //serie A
+    val SEASON = Calendar.getInstance().get(Calendar.YEAR).toString()
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -131,6 +142,55 @@ class MainActivity : ComponentActivity() {
 
             }
         }
+        //getFixturesList()
+        getPlayers()
+    }
+    private fun getFixturesList(){
+        val retrofit = RetrofitClient.getInstance()
+        val apiInterface = retrofit.create(FootballApi::class.java)
+        val getFixturesResponse = apiInterface.getFixtures(LEAGUE_ID, SEASON, API_TEAM_ID)
+        getFixturesResponse.enqueue(object : Callback<FixturesApiResponse> {
+            override fun onResponse(
+                call: Call<FixturesApiResponse>,
+                response: Response<FixturesApiResponse>
+            ) {
+                if(response.code()==200)
+                {
+                    Log.d("sucessful response",""+response.body()!!.fixturesResponse.size)
+                    val fixturesApiResponse = response.body()!!
+                    val fixturesResponse = fixturesApiResponse.fixturesResponse
+                    fixturesResponse.forEach{e->
+                        Log.d("fixture",e.fixture!!.venue!!.name!!)
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<FixturesApiResponse>, t: Throwable) {
+                Log.d("failed response",t.message.toString())
+
+                Toast.makeText(this@MainActivity,t.message,Toast.LENGTH_SHORT).show()
+            }
+
+        })
+
+    }
+    private fun getPlayers(){
+        val retrofit = RetrofitClient.getInstance()
+        val apiInterface = retrofit.create(FootballApi::class.java)
+        val getPlayersResponse = apiInterface.getPlayers(SEASON, API_TEAM_ID,"1")
+        getPlayersResponse.enqueue(object : Callback<TeamResponse>{
+            override fun onResponse(call: Call<TeamResponse>, response: Response<TeamResponse>) {
+                if(response.code()==200)
+                {
+                    Log.d("player response",response.message())
+                }
+            }
+
+            override fun onFailure(call: Call<TeamResponse>, t: Throwable) {
+                TODO("Not yet implemented")
+            }
+
+        })
     }
 }
 
@@ -158,7 +218,7 @@ fun TopAppBarRed() {
 @Composable
 fun ButtonList(contentPadding: PaddingValues, navigation:NavController){
 
-    Column(verticalArrangement = Arrangement.Top,
+    Column(verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     modifier = Modifier
         .fillMaxSize()
@@ -172,6 +232,7 @@ fun ButtonList(contentPadding: PaddingValues, navigation:NavController){
     }
 
 }
+
 @Composable
 fun MainButton(buttonText:String, navigation: NavController){
     Button(modifier = Modifier
@@ -309,7 +370,7 @@ fun MatchesPage(contentPadding: PaddingValues)
     )
 }
 @Composable
-fun fixturesCard()
+fun FixturesCard()
 {
     Box(modifier = Modifier
         .padding(10.dp)

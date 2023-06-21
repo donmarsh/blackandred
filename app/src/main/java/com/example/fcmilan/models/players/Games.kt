@@ -1,4 +1,4 @@
-package com.example.fcmilan.models
+package com.example.fcmilan.models.players
 
 import com.google.gson.annotations.SerializedName
 

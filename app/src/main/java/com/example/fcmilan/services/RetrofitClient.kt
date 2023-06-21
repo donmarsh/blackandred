@@ -8,10 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     val BASE_URL = "https://v3.football.api-sports.io"
-    val API_KEY = BuildConfig.API_SPORTS_KEY
-    val API_TEAM_ID = "489";
-    val PLAYERS_ENDPOINT  = "players"
-    val LEAGUE_ID = "135" //serie A
+
 
     fun getInstance(): Retrofit {
         var mHttpLoggingInterceptor = HttpLoggingInterceptor()
@@ -23,7 +20,7 @@ object RetrofitClient {
             .build()
 
 
-        var retrofit: Retrofit = retrofit2.Retrofit.Builder()
+        var retrofit: Retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(mOkHttpClient)

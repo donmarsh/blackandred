@@ -5,11 +5,10 @@ import com.google.gson.annotations.SerializedName
 
 data class FixturesResponse (
 
-  @SerializedName("get"        ) var get        : String?             = null,
-  @SerializedName("parameters" ) var parameters : Parameters?         = Parameters(),
-  @SerializedName("errors"     ) var errors     : ArrayList<String>   = arrayListOf(),
-  @SerializedName("results"    ) var results    : Int?                = null,
-  @SerializedName("paging"     ) var paging     : Paging?             = Paging(),
-  @SerializedName("response"   ) var response   : ArrayList<Response> = arrayListOf()
+    @SerializedName("fixture" ) var fixture : Fixture? = Fixture(),
+    @SerializedName("league"  ) var league  : League?  = League(),
+    @SerializedName("teams"   ) var teams   : Teams?   = Teams(),
+    @SerializedName("goals"   ) var goals   : Goals?   = Goals(),
+    @SerializedName("score"   ) var score   : Score?   = Score()
 
 )

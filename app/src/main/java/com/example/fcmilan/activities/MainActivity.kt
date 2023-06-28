@@ -6,6 +6,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -53,20 +54,30 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.fcmilan.FootballApplication
 import com.example.fcmilan.R
+import com.example.fcmilan.entities.Fixture
+import com.example.fcmilan.entities.Player
 import com.example.fcmilan.models.fixtures.FixturesApiResponse
-import com.example.fcmilan.models.players.TeamResponse
+import com.example.fcmilan.models.players.PlayersResponse
+import com.example.fcmilan.repositories.FixtureRepository
+import com.example.fcmilan.services.toPlayerEntity
 import com.example.fcmilan.services.FootballApi
 import com.example.fcmilan.services.RetrofitClient
+import com.example.fcmilan.services.toFixture
 import com.example.fcmilan.ui.theme.Black
 import com.example.fcmilan.ui.theme.FCMilanTheme
 import com.example.fcmilan.ui.theme.RedGradientStart
 import com.example.fcmilan.ui.theme.RedPlain
 import com.example.fcmilan.viewmodels.MainViewModel
+import com.example.fcmilan.viewmodels.MainViewModelFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -74,9 +85,13 @@ import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
     private lateinit var viewModel: MainViewModel
-    val API_TEAM_ID = "489"
-    val LEAGUE_ID = "135" //serie A
-    val SEASON = Calendar.getInstance().get(Calendar.YEAR).toString()
+    private val API_TEAM_ID = "489"
+    private val LEAGUE_ID = "135" //serie A
+    private val SEASON = Calendar.getInstance().get(Calendar.YEAR)-1
+    private val mainViewModel: MainViewModel by viewModels {
+            MainViewModelFactory((application as FootballApplication).playerRepository,
+                (application as FootballApplication).fixtureRepository)
+    }
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -142,13 +157,14 @@ class MainActivity : ComponentActivity() {
 
             }
         }
-        //getFixturesList()
+        getFixturesList()
         getPlayers()
     }
     private fun getFixturesList(){
+        val fixturesEntities = arrayListOf<Fixture>()
         val retrofit = RetrofitClient.getInstance()
         val apiInterface = retrofit.create(FootballApi::class.java)
-        val getFixturesResponse = apiInterface.getFixtures(LEAGUE_ID, SEASON, API_TEAM_ID)
+        val getFixturesResponse = apiInterface.getFixtures(LEAGUE_ID, SEASON.toString(), API_TEAM_ID)
         getFixturesResponse.enqueue(object : Callback<FixturesApiResponse> {
             override fun onResponse(
                 call: Call<FixturesApiResponse>,
@@ -156,12 +172,14 @@ class MainActivity : ComponentActivity() {
             ) {
                 if(response.code()==200)
                 {
-                    Log.d("sucessful response",""+response.body()!!.fixturesResponse.size)
                     val fixturesApiResponse = response.body()!!
                     val fixturesResponse = fixturesApiResponse.fixturesResponse
                     fixturesResponse.forEach{e->
                         Log.d("fixture",e.fixture!!.venue!!.name!!)
+                        fixturesEntities.add(e.toFixture())
                     }
+                    mainViewModel.deleteFixtures()
+                    mainViewModel.insertFixtures(fixturesEntities)
                 }
             }
 
@@ -175,22 +193,39 @@ class MainActivity : ComponentActivity() {
 
     }
     private fun getPlayers(){
+        val allPlayers:ArrayList<PlayersResponse> = arrayListOf()
         val retrofit = RetrofitClient.getInstance()
         val apiInterface = retrofit.create(FootballApi::class.java)
-        val getPlayersResponse = apiInterface.getPlayers(SEASON, API_TEAM_ID,"1")
-        getPlayersResponse.enqueue(object : Callback<TeamResponse>{
-            override fun onResponse(call: Call<TeamResponse>, response: Response<TeamResponse>) {
-                if(response.code()==200)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val getPlayersResponse = apiInterface.getPlayers(SEASON.toString(), API_TEAM_ID,"1").execute()
+            if(getPlayersResponse.isSuccessful)
+            {
+                val totalPages = getPlayersResponse.body()!!.paging!!.total!!
+                allPlayers.addAll(getPlayersResponse.body()!!.playersResponse)
+                Log.d("player response",getPlayersResponse.message())
+                for(i in 2..totalPages)
                 {
-                    Log.d("player response",response.message())
+                    val nextPlayersResponse = apiInterface.getPlayers(SEASON.toString(),API_TEAM_ID,""+i).execute()
+                    allPlayers.addAll(nextPlayersResponse.body()!!.playersResponse)
                 }
+                Log.d("totalPlayers",""+allPlayers.size)
+                val playerList = arrayListOf<Player>()
+                for(i in 0 until allPlayers.size)
+                {
+                    val currentPlayer = allPlayers[i].player!!
+                    playerList.add(currentPlayer.toPlayerEntity())
+                }
+                mainViewModel.deletePlayers()
+                mainViewModel.insertPlayers(playerList)
+
+            }
+            else
+            {
+                Log.d("error",getPlayersResponse.errorBody()!!.string())
             }
 
-            override fun onFailure(call: Call<TeamResponse>, t: Throwable) {
-                TODO("Not yet implemented")
-            }
+        }
 
-        })
     }
 }
 

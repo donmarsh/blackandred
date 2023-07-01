@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -82,6 +83,8 @@ import com.example.fcmilan.ui.theme.Black
 import com.example.fcmilan.ui.theme.FCMilanTheme
 import com.example.fcmilan.ui.theme.RedGradientStart
 import com.example.fcmilan.ui.theme.RedPlain
+import com.example.fcmilan.ui.theme.tRedGradientEdge
+import com.example.fcmilan.ui.theme.tRedGradientMid
 import com.example.fcmilan.viewmodels.MainViewModel
 import com.example.fcmilan.viewmodels.MainViewModelFactory
 import kotlinx.coroutines.Dispatchers
@@ -438,7 +441,7 @@ fun FixturesCard(fixture: Fixture)
     Box(modifier = Modifier
         .padding(10.dp)
         .fillMaxWidth()
-        .height(150.dp)
+        .height(160.dp)
         .background(color = RedPlain))
     {
         Box(modifier = Modifier
@@ -461,18 +464,18 @@ fun FixturesCard(fixture: Fixture)
                                 .data(fixture.homeTeamUrl)
                                 .build(),
                             modifier = Modifier
-                                .height(70.dp)
-                                .width(70.dp)
+                                .height(80.dp)
+                                .width(80.dp)
                                 .padding(start = 10.dp)
                                 .clip(CircleShape)
                                 .border(2.dp, Color.Black, CircleShape),
                             contentScale = ContentScale.Crop,
                             contentDescription = "Home Team Image",
                         )
-                        Text(fixture.homeTeam,
+                        Text(fixture.homeTeam.uppercase(),
                             style  = TextStyle(fontSize = 11.sp),
                             modifier = Modifier
-                                .width(70.dp)
+                                .width(80.dp)
                                 .padding(start = 10.dp),
                             color = Color.White,
                             textAlign = TextAlign.Center)
@@ -480,25 +483,35 @@ fun FixturesCard(fixture: Fixture)
                     }
 
 
-                    Spacer(Modifier.weight(1f))
+                    Spacer(Modifier.weight(1f)
+                        .height(40.dp).offset(y = 20.dp)
+                        .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                tRedGradientMid,
+                                tRedGradientEdge,
+                                tRedGradientMid
+                            )
+                        )
+                    ))
                     Column() {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(fixture.awayTeamUrl)
                                 .build(),
                             modifier = Modifier
-                                .height(70.dp)
-                                .width(70.dp)
+                                .height(80.dp)
+                                .width(80.dp)
                                 .padding(end = 10.dp)
                                 .clip(CircleShape)
                                 .border(2.dp, Color.Black, CircleShape),
                             contentScale = ContentScale.Crop,
                             contentDescription = "Away Team Image"
                         )
-                        Text(fixture.awayTeam,
+                        Text(fixture.awayTeam.uppercase(),
                             style  = TextStyle(fontSize = 11.sp),
                             modifier = Modifier
-                                .width(70.dp)
+                                .width(80.dp)
                                 .padding(end = 10.dp),
                             color = Color.White,
                             textAlign = TextAlign.Center)

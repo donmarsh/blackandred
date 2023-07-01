@@ -13,3 +13,6 @@ val Pink40 = Color(0xFF7D5260)
 val RedPlain = Color(0xFFD60129)
 val RedGradientStart = Color(0xFFCB0328)
 val Black = Color(0xFF000000)
+
+val tRedGradientEdge = Color(0xFFCB0328)
+val tRedGradientMid = Color(0xFFD60129)

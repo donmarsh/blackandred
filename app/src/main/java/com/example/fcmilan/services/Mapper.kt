@@ -12,7 +12,7 @@ fun com.example.fcmilan.models.players.Player.toPlayerEntity() = com.example.fcm
 
 fun FixturesResponse.toFixture() = Fixture(
     id = null,
-    timeStamp =fixture!!.timestamp!!,
+    date =fixture!!.date!!,
     homeTeam = "${teams!!.home!!.name}",
     awayTeam = "${teams!!.away!!.name}",
     homeTeamUrl = "${teams!!.home!!.logo}",

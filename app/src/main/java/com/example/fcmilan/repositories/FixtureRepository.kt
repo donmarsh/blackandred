@@ -15,4 +15,3 @@ class FixtureRepository(private val fixtureDao: FixtureDao) {
 }
 
 
-}

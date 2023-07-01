@@ -16,12 +16,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
@@ -37,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -46,6 +53,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,23 +61,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.fcmilan.FootballApplication
 import com.example.fcmilan.R
 import com.example.fcmilan.entities.Fixture
 import com.example.fcmilan.entities.Player
 import com.example.fcmilan.models.fixtures.FixturesApiResponse
 import com.example.fcmilan.models.players.PlayersResponse
-import com.example.fcmilan.repositories.FixtureRepository
-import com.example.fcmilan.services.toPlayerEntity
 import com.example.fcmilan.services.FootballApi
 import com.example.fcmilan.services.RetrofitClient
 import com.example.fcmilan.services.toFixture
+import com.example.fcmilan.services.toPlayerEntity
 import com.example.fcmilan.ui.theme.Black
 import com.example.fcmilan.ui.theme.FCMilanTheme
 import com.example.fcmilan.ui.theme.RedGradientStart
@@ -81,10 +89,12 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
-    private lateinit var viewModel: MainViewModel
     private val API_TEAM_ID = "489"
     private val LEAGUE_ID = "135" //serie A
     private val SEASON = Calendar.getInstance().get(Calendar.YEAR)-1
@@ -95,11 +105,11 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
-        viewModel.setIsHomeScreen(true)
+        mainViewModel.setIsHomeScreen(true)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            val isCurrentScreenHomeScreen by viewModel.isHomeCurrent.observeAsState()
+            val isCurrentScreenHomeScreen by mainViewModel.isHomeCurrent.observeAsState()
+            val fixtures by mainViewModel.allFixtures.observeAsState()
             val navController = rememberNavController()
 
             FCMilanTheme {
@@ -120,29 +130,29 @@ class MainActivity : ComponentActivity() {
                             content = { innerPadding ->
                                 NavHost(navController = navController, startDestination = "HOME") {
                                     composable("HOME") {
-                                        viewModel.setIsHomeScreen(true)
-                                        Log.e("isHomeScreen",viewModel.isHomeCurrent.value.toString())
+                                        mainViewModel.setIsHomeScreen(true)
+                                        Log.e("isHomeScreen",mainViewModel.isHomeCurrent.value.toString())
                                         ButtonList(contentPadding = innerPadding, navigation = navController)
                                     }
                                     composable("TROPHIES") {
-                                        viewModel.setIsHomeScreen(false)
+                                        mainViewModel.setIsHomeScreen(false)
                                         TrophyPage(contentPadding = innerPadding)
                                     }
                                     composable("GALLERY") {
-                                        viewModel.setIsHomeScreen(false)
+                                        mainViewModel.setIsHomeScreen(false)
                                         GalleryPage(contentPadding = innerPadding)
                                     }
                                     composable("History") {
-                                        viewModel.setIsHomeScreen(false)
+                                        mainViewModel.setIsHomeScreen(false)
                                         HistoryPage(contentPadding = innerPadding)
                                     }
                                     composable("MATCHES") {
-                                        viewModel.setIsHomeScreen(false)
-                                        MatchesPage(contentPadding = innerPadding)
+                                        mainViewModel.setIsHomeScreen(false)
+                                        MatchesPage(contentPadding = innerPadding,fixtures!!)
                                     }
                                     composable("PLAYERS") {
-                                        viewModel.setIsHomeScreen(false)
-                                        Log.e("isHomeScreen",viewModel.isHomeCurrent.value.toString())
+                                        mainViewModel.setIsHomeScreen(false)
+                                        Log.e("isHomeScreen",mainViewModel.isHomeCurrent.value.toString())
                                         PlayersPage(contentPadding = innerPadding)
                                     }
                                 }
@@ -158,7 +168,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         getFixturesList()
-        getPlayers()
+        //getPlayers()
     }
     private fun getFixturesList(){
         val fixturesEntities = arrayListOf<Fixture>()
@@ -170,12 +180,13 @@ class MainActivity : ComponentActivity() {
                 call: Call<FixturesApiResponse>,
                 response: Response<FixturesApiResponse>
             ) {
+                Log.d("fixtures_response","${response.code()}")
                 if(response.code()==200)
                 {
                     val fixturesApiResponse = response.body()!!
                     val fixturesResponse = fixturesApiResponse.fixturesResponse
                     fixturesResponse.forEach{e->
-                        Log.d("fixture",e.fixture!!.venue!!.name!!)
+                        Log.d("fixture_venue",e.fixture!!.venue!!.name!!)
                         fixturesEntities.add(e.toFixture())
                     }
                     mainViewModel.deleteFixtures()
@@ -397,26 +408,115 @@ fun PlayersPage(contentPadding: PaddingValues)
     )
 }
 @Composable
-fun MatchesPage(contentPadding: PaddingValues)
+fun MatchesPage(contentPadding: PaddingValues,fixtures:List<Fixture> )
 {
-    Text(
-        text = "Matches Page!",
-        modifier = Modifier.padding(contentPadding)
-    )
+    LazyColumn(modifier = Modifier
+        .fillMaxHeight()
+        .padding(contentPadding)){
+       items(fixtures){ fixture->
+           FixturesCard(fixture = fixture)
+
+
+       }
+    }
+
+
 }
 @Composable
-fun FixturesCard()
+fun FixturesCard(fixture: Fixture)
 {
+    val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.getDefault())
+    val calendar = Calendar.getInstance(Locale.getDefault())
+    calendar.time = sdf.parse(fixture.date) as Date
+    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+    val minute = calendar.get(Calendar.MINUTE)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+    val month = calendar.get(Calendar.MONTH)
+    val time =  String.format("%02d:%02d", hour, minute)
+    val date = String.format("%02d.%02d", day, month)
+
     Box(modifier = Modifier
         .padding(10.dp)
         .fillMaxWidth()
         .height(150.dp)
         .background(color = RedPlain))
     {
-        Box(modifier = Modifier.padding(5.dp).background(
-            color = Color.Black
+        Box(modifier = Modifier
+            .padding(5.dp)
+            .fillMaxSize()
+            .background(
+                color = Color.Black
             )
-        .border(BorderStroke(2.dp, Color.White)))
+            .border(BorderStroke(2.dp, Color.White))){
+            Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(time, color = Color.Black,
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .background(color = Color.White),
+                    textAlign = TextAlign.Center)
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Column() {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(fixture.homeTeamUrl)
+                                .build(),
+                            modifier = Modifier
+                                .height(70.dp)
+                                .width(70.dp)
+                                .padding(start = 10.dp)
+                                .clip(CircleShape)
+                                .border(2.dp, Color.Black, CircleShape),
+                            contentScale = ContentScale.Crop,
+                            contentDescription = "Home Team Image",
+                        )
+                        Text(fixture.homeTeam,
+                            style  = TextStyle(fontSize = 11.sp),
+                            modifier = Modifier
+                                .width(70.dp)
+                                .padding(start = 10.dp),
+                            color = Color.White,
+                            textAlign = TextAlign.Center)
+
+                    }
+
+
+                    Spacer(Modifier.weight(1f))
+                    Column() {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(fixture.awayTeamUrl)
+                                .build(),
+                            modifier = Modifier
+                                .height(70.dp)
+                                .width(70.dp)
+                                .padding(end = 10.dp)
+                                .clip(CircleShape)
+                                .border(2.dp, Color.Black, CircleShape),
+                            contentScale = ContentScale.Crop,
+                            contentDescription = "Away Team Image"
+                        )
+                        Text(fixture.awayTeam,
+                            style  = TextStyle(fontSize = 11.sp),
+                            modifier = Modifier
+                                .width(70.dp)
+                                .padding(end = 10.dp),
+                            color = Color.White,
+                            textAlign = TextAlign.Center)
+                    }
+
+
+
+                }
+                Text(date, color = Color.Black,
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .background(color = Color.White),
+                    textAlign = TextAlign.Center)
+
+            }
+
+
+        }
     }
 }
 @Composable
@@ -426,16 +526,20 @@ fun PlayersCard()
         .padding(10.dp)
         .fillMaxWidth()
         .height(150.dp)
-        .background(color = RedPlain).shadow(1.dp))
+        .background(color = RedPlain)
+        .shadow(1.dp))
     {
-        Box(modifier = Modifier.padding(5.dp).background(
-            brush = Brush.horizontalGradient(
-                colors = listOf(
-                    RedGradientStart,
-                    Black
+        Box(modifier = Modifier
+            .padding(5.dp)
+            .background(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        RedGradientStart,
+                        Black
+                    )
                 )
             )
-        ).border(BorderStroke(2.dp, Color.White)))
+            .border(BorderStroke(2.dp, Color.White)))
         {
 
         }

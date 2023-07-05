@@ -24,7 +24,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -113,6 +115,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val isCurrentScreenHomeScreen by mainViewModel.isHomeCurrent.observeAsState()
             val fixtures by mainViewModel.allFixtures.observeAsState()
+            val players by mainViewModel.allPlayers.observeAsState()
             val navController = rememberNavController()
 
             FCMilanTheme {
@@ -156,7 +159,7 @@ class MainActivity : ComponentActivity() {
                                     composable("PLAYERS") {
                                         mainViewModel.setIsHomeScreen(false)
                                         Log.e("isHomeScreen",mainViewModel.isHomeCurrent.value.toString())
-                                        PlayersPage(contentPadding = innerPadding)
+                                        PlayersPage(contentPadding = innerPadding,players!!)
                                     }
                                 }
                             },
@@ -171,7 +174,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         getFixturesList()
-        //getPlayers()
+        getPlayers()
     }
     private fun getFixturesList(){
         val fixturesEntities = arrayListOf<Fixture>()
@@ -403,12 +406,17 @@ fun GalleryImage(id:Int) {
 
 }
 @Composable
-fun PlayersPage(contentPadding: PaddingValues)
+fun PlayersPage(contentPadding: PaddingValues,players:List<Player>)
 {
-    Text(
-        text = "Players Page!",
-        modifier = Modifier.padding(contentPadding)
-    )
+    LazyColumn(modifier = Modifier
+        .fillMaxHeight()
+        .padding(contentPadding)){
+        items(players){ player->
+            PlayersCard(player = player)
+
+
+        }
+    }
 }
 @Composable
 fun MatchesPage(contentPadding: PaddingValues,fixtures:List<Fixture> )
@@ -483,17 +491,20 @@ fun FixturesCard(fixture: Fixture)
                     }
 
 
-                    Spacer(Modifier.weight(1f)
-                        .height(40.dp).offset(y = 20.dp)
-                        .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                tRedGradientMid,
-                                tRedGradientEdge,
-                                tRedGradientMid
-                            )
-                        )
-                    ))
+                    Spacer(
+                        Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                            .offset(y = 20.dp)
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        tRedGradientMid,
+                                        tRedGradientEdge,
+                                        tRedGradientMid
+                                    )
+                                )
+                            ))
                     Column() {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
@@ -533,12 +544,12 @@ fun FixturesCard(fixture: Fixture)
     }
 }
 @Composable
-fun PlayersCard()
+fun PlayersCard(player: Player)
 {
     Box(modifier = Modifier
         .padding(10.dp)
         .fillMaxWidth()
-        .height(150.dp)
+        .wrapContentHeight()
         .background(color = RedPlain)
         .shadow(1.dp))
     {
@@ -554,6 +565,28 @@ fun PlayersCard()
             )
             .border(BorderStroke(2.dp, Color.White)))
         {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(text = player.name,
+                        modifier = Modifier.padding(10.dp).requiredWidth(100.dp), color = Color.White)
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(player.imageUrl)
+                        .build(),
+                    modifier = Modifier
+                        .height(80.dp)
+                        .width(80.dp)
+                        .padding(start = 10.dp)
+
+                        .clip(RectangleShape)
+                        .border(2.dp, Color.White, RectangleShape),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = "${player.name} Image",
+                )
+                Text(text = player.height, color = Color.White, modifier = Modifier.padding(start = 10.dp,end = 20.dp))
+                Spacer(modifier = Modifier.padding(5.dp).weight(1f))
+                Text(text = player.age.toString()+"y", color = Color.White, modifier = Modifier.padding(5.dp))
+
+            }
 
         }
     }

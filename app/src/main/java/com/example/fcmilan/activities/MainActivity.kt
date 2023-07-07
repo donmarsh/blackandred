@@ -1,5 +1,6 @@
 package com.example.fcmilan.activities
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
@@ -24,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -101,7 +101,7 @@ import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private val API_TEAM_ID = "489"
-    private val LEAGUE_ID = "135" //serie A
+    private val LEAGUE_ID = "135"
     private val SEASON = Calendar.getInstance().get(Calendar.YEAR)-1
     private val mainViewModel: MainViewModel by viewModels {
             MainViewModelFactory((application as FootballApplication).playerRepository,
@@ -244,6 +244,7 @@ class MainActivity : ComponentActivity() {
         }
 
     }
+
 }
 
 @Composable
@@ -377,6 +378,7 @@ fun TrophyInformation() {
     StyledText(textResource(id = R.string.trophy_information))
 
 }
+@SuppressLint("DiscouragedApi")
 @Composable
 fun GalleryPage(contentPadding:PaddingValues)
 {
@@ -466,7 +468,7 @@ fun FixturesCard(fixture: Fixture)
                         .background(color = Color.White),
                     textAlign = TextAlign.Center)
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    Column() {
+                    Column {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(fixture.homeTeamUrl)
@@ -489,11 +491,7 @@ fun FixturesCard(fixture: Fixture)
                             textAlign = TextAlign.Center)
 
                     }
-
-
-                    Spacer(
-                        Modifier
-                            .weight(1f)
+                    Spacer(Modifier.weight(1f)
                             .height(40.dp)
                             .offset(y = 20.dp)
                             .background(
@@ -505,7 +503,7 @@ fun FixturesCard(fixture: Fixture)
                                     )
                                 )
                             ))
-                    Column() {
+                    Column {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(fixture.awayTeamUrl)
@@ -567,7 +565,7 @@ fun PlayersCard(player: Player)
         {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(text = player.name,
-                        modifier = Modifier.padding(10.dp).requiredWidth(100.dp), color = Color.White)
+                        modifier = Modifier.padding(start = 5.dp).weight(1f), color = Color.White)
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(player.imageUrl)
@@ -576,15 +574,17 @@ fun PlayersCard(player: Player)
                         .height(80.dp)
                         .width(80.dp)
                         .padding(start = 10.dp)
-
                         .clip(RectangleShape)
                         .border(2.dp, Color.White, RectangleShape),
                     contentScale = ContentScale.Crop,
                     contentDescription = "${player.name} Image",
                 )
-                Text(text = player.height, color = Color.White, modifier = Modifier.padding(start = 10.dp,end = 20.dp))
-                Spacer(modifier = Modifier.padding(5.dp).weight(1f))
-                Text(text = player.age.toString()+"y", color = Color.White, modifier = Modifier.padding(5.dp))
+                Row(modifier = Modifier.weight(1f).wrapContentHeight()){
+                    Text(text = player.height, color = Color.White, modifier = Modifier.padding(start = 10.dp))
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = player.age.toString()+"y", color = Color.White, modifier = Modifier.padding(end = 5.dp))
+
+                }
 
             }
 

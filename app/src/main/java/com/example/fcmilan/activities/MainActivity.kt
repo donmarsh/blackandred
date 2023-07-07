@@ -565,7 +565,7 @@ fun PlayersCard(player: Player)
         {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(text = player.name,
-                        modifier = Modifier.padding(start = 5.dp).weight(1f), color = Color.White)
+                        modifier = Modifier.padding(start = 10.dp).weight(1f), color = Color.White)
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(player.imageUrl)
@@ -582,7 +582,7 @@ fun PlayersCard(player: Player)
                 Row(modifier = Modifier.weight(1f).wrapContentHeight()){
                     Text(text = player.height, color = Color.White, modifier = Modifier.padding(start = 10.dp))
                     Spacer(modifier = Modifier.weight(1f))
-                    Text(text = player.age.toString()+"y", color = Color.White, modifier = Modifier.padding(end = 5.dp))
+                    Text(text = player.age.toString()+"y", color = Color.White, modifier = Modifier.padding(end = 10.dp))
 
                 }
 

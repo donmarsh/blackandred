@@ -1,30 +1,39 @@
 package com.example.fcmilan.services
 
 import com.example.fcmilan.BuildConfig
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    val BASE_URL = "https://v3.football.api-sports.io"
-
+   private const val BASE_URL = "https://v3.football.api-sports.io"
+    private val API_KEY: String
+        get() = BuildConfig.API_SPORTS_KEY
 
     fun getInstance(): Retrofit {
-        var mHttpLoggingInterceptor = HttpLoggingInterceptor()
+        val mHttpLoggingInterceptor = HttpLoggingInterceptor()
             .setLevel(HttpLoggingInterceptor.Level.BODY)
 
-        var mOkHttpClient = OkHttpClient
-            .Builder()
+        val mOkHttpClient = OkHttpClient
+            .Builder().apply {
+                addInterceptor(
+                    Interceptor { chain ->
+                        val builder = chain.request().newBuilder()
+                        builder.header("x-apisports-key", API_KEY)
+                        return@Interceptor chain.proceed(builder.build())
+                    }
+                )
+            }
             .addInterceptor(mHttpLoggingInterceptor)
             .build()
 
 
-        var retrofit: Retrofit = Retrofit.Builder()
+        return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(mOkHttpClient)
             .build()
-        return retrofit
     }
 }
